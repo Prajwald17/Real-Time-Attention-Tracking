@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Attention Tracking System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/umd/tasks-vision.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0/dist/tf.min.js"></script>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header__content">
+                    <div class="header__brand">
+                        <h1>Real-Time Attention Tracking</h1>
+                        <p class="header__subtitle">AI-powered attention monitoring with live computer vision processing</p>
+                    </div>
+                    <div class="header__status">
+                        <div class="connection-status">
+                            <div class="status-indicator status-indicator--loading" id="system-status"></div>
+                            <span id="system-status-text">Loading Models...</span>
+                        </div>
+                    </div>
+                </div>
+                <nav class="nav">
+                    <button class="nav__item nav__item--active" data-section="monitor">Live Monitor</button>
+                    <button class="nav__item" data-section="upload">Video Analysis</button>
+                    <button class="nav__item" data-section="analytics">Analytics</button>
+                    <button class="nav__item" data-section="settings">Settings</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Monitor Section -->
+            <section id="monitor" class="section section--active">
+                <div class="container">
+                    <div class="monitor-layout">
+                        <!-- Video Feed Area -->
+                        <div class="video-section">
+                            <div class="card video-card">
+                                <div class="card__header">
+                                    <h3>Live Camera Feed</h3>
+                                    <div class="video-controls">
+                                        <button class="btn btn--secondary" id="camera-btn" disabled>
+                                            <span class="btn-icon">📹</span>
+                                            Start Camera
+                                        </button>
+                                        <button class="btn btn--primary hidden" id="record-btn">
+                                            <span class="btn-icon">⏺</span>
+                                            Start Recording
+                                        </button>
+                                        <button class="btn btn--error hidden" id="stop-record-btn">
+                                            <span class="btn-icon">⏹</span>
+                                            Stop Recording
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card__body">
+                                    <div class="video-container">
+                                        <div class="video-feed" id="video-feed-container">
+                                            <video id="video-feed" autoplay muted playsinline style="display: none;"></video>
+                                            <canvas id="output-canvas" style="display: none;"></canvas>
+                                            <div class="video-placeholder" id="video-placeholder">
+                                                <div class="video-icon">📹</div>
+                                                <p>Loading computer vision models...</p>
+                                                <div class="loading-progress">
+                                                    <div class="progress-bar">
+                                                        <div class="progress-fill" id="loading-progress" style="width: 0%"></div>
+                                                    </div>
+                                                    <span id="loading-text">Initializing MediaPipe...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="detection-overlay" id="detection-overlay">
+                                            <div class="detection-indicators">
+                                                <div class="indicator face-detection" id="face-indicator">
+                                                    <span class="indicator-dot" id="face-dot"></span>
+                                                    <span id="face-status">No Face</span>
+                                                </div>
+                                                <div class="indicator gaze-tracking" id="gaze-indicator">
+                                                    <span class="indicator-dot" id="gaze-dot"></span>
+                                                    Gaze: <span id="gaze-direction">-</span>
+                                                </div>
+                                                <div class="indicator head-pose" id="pose-indicator">
+                                                    <span class="indicator-dot" id="pose-dot"></span>
+                                                    Head: <span id="head-pose">Neutral</span>
+                                                </div>
+                                                <div class="indicator recording-status hidden" id="recording-indicator">
+                                                    <span class="indicator-dot recording-dot"></span>
+                                                    Recording
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="processing-info">
+                                        <div class="info-grid">
+                                            <div class="info-item">
+                                                <span class="info-label">Processing FPS:</span>
+                                                <span class="info-value" id="processing-fps">0</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">Landmarks:</span>
+                                                <span class="info-value" id="landmarks-count">0</span>
+                                            </div>
+                                            <div class="info-item">
+                                                <span class="info-label">Eye AR:</span>
+                                                <span class="info-value" id="eye-ar">0.00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Metrics Panel -->
+                        <div class="metrics-section">
+                            <div class="card">
+                                <div class="card__header">
+                                    <h3>Live Attention Metrics</h3>
+                                    <div class="status status--info" id="monitoring-status">Initializing</div>
+                                </div>
+                                <div class="card__body">
+                                    <div class="attention-score">
+                                        <div class="score-circle" id="attention-circle">
+                                            <div class="score-value" id="attention-score">--</div>
+                                            <div class="score-label">Attention %</div>
+                                        </div>
+                                    </div>
+                                    <div class="metrics-grid">
+                                        <div class="metric-item">
+                                            <div class="metric-label">Session Time</div>
+                                            <div class="metric-value" id="session-time">00:00:00</div>
+                                        </div>
+                                        <div class="metric-item">
+                                            <div class="metric-label">Average Score</div>
+                                            <div class="metric-value" id="average-score">--%</div>
+                                        </div>
+                                        <div class="metric-item">
+                                            <div class="metric-label">Blink Rate</div>
+                                            <div class="metric-value" id="blink-rate">--/min</div>
+                                        </div>
+                                        <div class="metric-item">
+                                            <div class="metric-label">Distraction Events</div>
+                                            <div class="metric-value" id="distraction-events">0</div>
+                                        </div>
+                                    </div>
+                                    <div class="detailed-metrics">
+                                        <h4>Computer Vision Metrics</h4>
+                                        <div class="cv-metrics">
+                                            <div class="cv-metric">
+                                                <span class="cv-label">Left Eye EAR:</span>
+                                                <span class="cv-value" id="left-ear">0.00</span>
+                                            </div>
+                                            <div class="cv-metric">
+                                                <span class="cv-label">Right Eye EAR:</span>
+                                                <span class="cv-value" id="right-ear">0.00</span>
+                                            </div>
+                                            <div class="cv-metric">
+                                                <span class="cv-label">Head Yaw:</span>
+                                                <span class="cv-value" id="head-yaw">0°</span>
+                                            </div>
+                                            <div class="cv-metric">
+                                                <span class="cv-label">Head Pitch:</span>
+                                                <span class="cv-value" id="head-pitch">0°</span>
+                                            </div>
+                                            <div class="cv-metric">
+                                                <span class="cv-label">Head Roll:</span>
+                                                <span class="cv-value" id="head-roll">0°</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Real-time Chart -->
+                            <div class="card">
+                                <div class="card__header">
+                                    <h3>Real-Time Attention Trend</h3>
+                                </div>
+                                <div class="card__body">
+                                    <div class="chart-container" style="position: relative; height: 200px;">
+                                        <canvas id="realtime-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Upload Section -->
+            <section id="upload" class="section">
+                <div class="container">
+                    <div class="upload-layout">
+                        <div class="card upload-card">
+                            <div class="card__header">
+                                <h3>Video Analysis</h3>
+                                <div class="upload-status" id="upload-system-status">
+                                    <span class="status status--success">Ready for Analysis</span>
+                                </div>
+                            </div>
+                            <div class="card__body">
+                                <div class="upload-area" id="upload-area">
+                                    <div class="upload-content">
+                                        <div class="upload-icon">📁</div>
+                                        <h4>Upload Video for Analysis</h4>
+                                        <p>Drop video files here or click to browse</p>
+                                        <p class="upload-info">Supported: MP4, WebM, AVI, MOV (Max 500MB)</p>
+                                        <input type="file" id="file-input" accept="video/mp4,video/webm,video/avi,video/mov" multiple hidden>
+                                        <button class="btn btn--primary" id="browse-btn">Browse Files</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="analysis-progress hidden" id="analysis-progress">
+                                    <div class="progress-header">
+                                        <span class="file-name" id="analysis-filename"></span>
+                                        <span class="progress-percent" id="analysis-percent">0%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="analysis-fill"></div>
+                                    </div>
+                                    <div class="analysis-details">
+                                        <div class="detail-item">
+                                            <span>Frames Processed:</span>
+                                            <span id="frames-processed">0</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span>Current Stage:</span>
+                                            <span id="analysis-stage">Preparing...</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span>Processing Speed:</span>
+                                            <span id="processing-speed">0 fps</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="video-preview hidden" id="video-preview">
+                                    <video id="analysis-video" controls style="width: 100%; max-height: 300px;"></video>
+                                    <div class="preview-controls">
+                                        <button class="btn btn--secondary" id="analyze-btn">Analyze Video</button>
+                                        <button class="btn btn--outline" id="clear-video-btn">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card results-card">
+                            <div class="card__header">
+                                <h3>Analysis Results</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="results-placeholder" id="results-placeholder">
+                                    <div class="placeholder-icon">📊</div>
+                                    <p>Upload and analyze a video to see results</p>
+                                </div>
+                                
+                                <div class="analysis-results hidden" id="analysis-results">
+                                    <div class="results-summary">
+                                        <div class="summary-item">
+                                            <div class="summary-label">Average Attention</div>
+                                            <div class="summary-value" id="avg-attention">0%</div>
+                                        </div>
+                                        <div class="summary-item">
+                                            <div class="summary-label">Total Distractions</div>
+                                            <div class="summary-value" id="total-distractions">0</div>
+                                        </div>
+                                        <div class="summary-item">
+                                            <div class="summary-label">Video Duration</div>
+                                            <div class="summary-value" id="video-duration">0:00</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="chart-container" style="position: relative; height: 250px;">
+                                        <canvas id="video-analysis-chart"></canvas>
+                                    </div>
+                                    
+                                    <div class="export-controls">
+                                        <button class="btn btn--secondary btn--sm" id="export-csv-btn">Export CSV</button>
+                                        <button class="btn btn--outline btn--sm" id="export-json-btn">Export JSON</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics" class="section">
+                <div class="container">
+                    <div class="analytics-header">
+                        <h2>Analytics Dashboard</h2>
+                        <div class="analytics-controls">
+                            <select class="form-control" id="time-range">
+                                <option value="today">Today</option>
+                                <option value="week" selected>This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                            <button class="btn btn--secondary" id="export-report-btn">Export Report</button>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-overview">
+                        <div class="overview-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">📊</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="total-sessions">0</div>
+                                    <div class="stat-label">Total Sessions</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">⏱</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="total-time">00:00:00</div>
+                                    <div class="stat-label">Total Time</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">📈</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="overall-avg">--%</div>
+                                    <div class="stat-label">Avg Attention</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🎯</div>
+                                <div class="stat-content">
+                                    <div class="stat-value" id="accuracy-score">--%</div>
+                                    <div class="stat-label">CV Accuracy</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-charts">
+                        <div class="chart-row">
+                            <div class="card chart-card">
+                                <div class="card__header">
+                                    <h3>Session History</h3>
+                                </div>
+                                <div class="card__body">
+                                    <div class="chart-container" style="position: relative; height: 300px;">
+                                        <canvas id="session-history-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card chart-card">
+                                <div class="card__header">
+                                    <h3>Attention Distribution</h3>
+                                </div>
+                                <div class="card__body">
+                                    <div class="chart-container" style="position: relative; height: 300px;">
+                                        <canvas id="attention-distribution-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="section">
+                <div class="container">
+                    <div class="settings-header">
+                        <h2>System Settings</h2>
+                        <button class="btn btn--primary" id="save-settings">Save Changes</button>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Computer Vision Settings</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="form-group">
+                                    <label class="form-label">Detection Confidence</label>
+                                    <select class="form-control" id="detection-confidence">
+                                        <option value="0.3">Low (0.3)</option>
+                                        <option value="0.5" selected>Medium (0.5)</option>
+                                        <option value="0.7">High (0.7)</option>
+                                        <option value="0.9">Very High (0.9)</option>
+                                    </select>
+                                    <p class="form-help">Higher values reduce false positives but may miss some detections</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Processing FPS Target</label>
+                                    <select class="form-control" id="processing-fps">
+                                        <option value="15">15 FPS (Battery Saver)</option>
+                                        <option value="30" selected>30 FPS (Balanced)</option>
+                                        <option value="60">60 FPS (High Performance)</option>
+                                    </select>
+                                    <p class="form-help">Higher FPS provides better tracking but uses more CPU</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="show-landmarks" checked> Show facial landmarks
+                                    </label>
+                                    <p class="form-help">Display detected facial landmarks on video feed</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Attention Detection</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="form-group">
+                                    <label class="form-label">EAR Blink Threshold</label>
+                                    <input type="range" class="range-input" id="ear-threshold" min="0.15" max="0.35" step="0.01" value="0.25">
+                                    <div class="range-value" id="ear-threshold-value">0.25</div>
+                                    <p class="form-help">Lower values detect more blinks (Eye Aspect Ratio threshold)</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Head Pose Sensitivity</label>
+                                    <select class="form-control" id="pose-sensitivity">
+                                        <option value="15">Low (±15°)</option>
+                                        <option value="25" selected>Medium (±25°)</option>
+                                        <option value="35">High (±35°)</option>
+                                    </select>
+                                    <p class="form-help">Maximum head rotation before marking as distracted</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Attention Window (seconds)</label>
+                                    <select class="form-control" id="attention-window">
+                                        <option value="3">3 seconds</option>
+                                        <option value="5" selected>5 seconds</option>
+                                        <option value="10">10 seconds</option>
+                                    </select>
+                                    <p class="form-help">Time window for calculating attention scores</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>Recording & Export</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="form-group">
+                                    <label class="form-label">Video Quality</label>
+                                    <select class="form-control" id="video-quality">
+                                        <option value="480p">480p (Low)</option>
+                                        <option value="720p">720p HD</option>
+                                        <option value="1080p" selected>1080p Full HD</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="auto-export"> Auto-export session data
+                                    </label>
+                                    <p class="form-help">Automatically save attention data after each session</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="save-landmarks"> Save landmark data
+                                    </label>
+                                    <p class="form-help">Include facial landmark coordinates in exports</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__header">
+                                <h3>System Info</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="system-info">
+                                    <div class="info-row">
+                                        <span class="info-key">MediaPipe Status:</span>
+                                        <span class="info-value" id="mediapipe-status">Loading...</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-key">TensorFlow.js:</span>
+                                        <span class="info-value" id="tfjs-status">Loading...</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-key">Camera Access:</span>
+                                        <span class="info-value" id="camera-status">Not Requested</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-key">Performance:</span>
+                                        <span class="info-value" id="performance-status">Detecting...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

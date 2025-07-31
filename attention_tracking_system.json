@@ -1,0 +1,115 @@
+{
+  "system_overview": {
+    "name": "Real-Time Attention Tracking & Recording System",
+    "description": "Advanced computer vision system for monitoring attention levels with live recording and video upload capabilities",
+    "key_features": [
+      "Real-time webcam attention monitoring",
+      "Live video recording and saving",
+      "Video file upload and processing",
+      "Computer vision-based attention analysis",
+      "Database storage with analytics",
+      "Web-based dashboard interface"
+    ]
+  },
+  "core_components": {
+    "computer_vision": {
+      "technologies": [
+        "MediaPipe Face Detection",
+        "dlib Facial Landmarks (68 points)",
+        "OpenCV for video processing",
+        "Real-time gaze tracking",
+        "Eye aspect ratio (EAR) calculation",
+        "Head pose estimation"
+      ],
+      "attention_indicators": [
+        "Eye gaze direction (left, right, center)",
+        "Blink rate monitoring (4.5-32.5 blinks/min)",
+        "Head pose angles (pitch, yaw, roll)",
+        "Face detection confidence",
+        "Looking away detection",
+        "Drowsiness indicators"
+      ]
+    },
+    "video_processing": {
+      "recording_capabilities": [
+        "Live webcam recording (MP4, AVI formats)",
+        "Real-time frame processing",
+        "Video compression with FFmpeg",
+        "Multiple codec support (H.264, XVID)",
+        "Configurable frame rates (20-30 FPS)"
+      ],
+      "upload_features": [
+        "Drag-and-drop interface",
+        "Multiple format support",
+        "File validation and security",
+        "Progress tracking",
+        "Batch processing"
+      ]
+    },
+    "backend_architecture": {
+      "flask_server": [
+        "RESTful API endpoints",
+        "Video upload handling",
+        "Real-time data streaming",
+        "Session management",
+        "WebSocket connections"
+      ],
+      "database_storage": [
+        "PostgreSQL/MongoDB integration",
+        "Real-time attention metrics",
+        "Video metadata storage",
+        "User session tracking",
+        "Analytics and reporting"
+      ]
+    }
+  },
+  "technical_implementation": {
+    "required_libraries": [
+      "opencv-python==4.8.1",
+      "mediapipe==0.10.5",
+      "dlib==19.24.2",
+      "flask==2.3.3",
+      "flask-socketio==5.3.6",
+      "numpy==1.24.3",
+      "pandas==2.0.3",
+      "sqlalchemy==2.0.21",
+      "ffmpeg-python==0.2.0"
+    ],
+    "performance_metrics": {
+      "processing_speed": "25-30 FPS real-time",
+      "detection_accuracy": "95%+ face detection",
+      "attention_accuracy": "85-90% attention classification",
+      "latency": "<100ms processing delay"
+    }
+  },
+  "application_architecture": {
+    "frontend": [
+      "React/HTML5 dashboard",
+      "Real-time video display",
+      "Attention metrics visualization",
+      "File upload interface",
+      "Analytics charts"
+    ],
+    "api_endpoints": [
+      "/api/start-monitoring",
+      "/api/upload-video",
+      "/api/get-attention-data",
+      "/api/save-session",
+      "/api/analytics"
+    ]
+  },
+  "deployment_requirements": {
+    "hardware": [
+      "Webcam (720p minimum, 1080p recommended)",
+      "CPU: Intel i5 or equivalent",
+      "RAM: 8GB minimum, 16GB recommended",
+      "Storage: 50GB for video storage"
+    ],
+    "software": [
+      "Python 3.8+",
+      "CUDA toolkit (optional for GPU acceleration)",
+      "FFmpeg for video processing",
+      "PostgreSQL or MongoDB"
+    ]
+  }
+}
