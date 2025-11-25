@@ -11,6 +11,57 @@
       "Web-based dashboard interface"
     ]
   },
+  "objectives": [
+    "Provide continuous, real-time attention scoring for remote users (WFH, online exams).",
+    "Detect and log distraction or drowsiness events and produce alerts (audio/visual) when attention falls below thresholds.",
+    "Allow offline/video analysis via upload with exportable reports and charts.",
+    "Support analytics and session storage for managerial or compliance review."
+  ],
+  "use_cases": [
+    "Work-from-home monitoring: measure attention during scheduled sessions and produce summaries.",
+    "Online exam proctoring: detect looking-away, prolonged absence, or suspicious behaviors and create audit logs.",
+    "Driver drowsiness detection: trigger audible alert when attention < 40% continuously for > 5 seconds, with optional external integration (CAN/telemetry)."
+  ],
+  "alerting": {
+    "drowsiness_alert": {
+      "attention_threshold_percent": 40,
+      "duration_seconds": 5,
+      "actions": [
+        "play local audible alarm",
+        "show on-screen warning",
+        "log event with timestamp and frame data"
+      ],
+      "notes": "Thresholds configurable in settings; provide debounce to avoid false positives."
+    }
+  },
+  "short_features": [
+    "Per-frame attention score (0–100%)",
+    "Blink and blink-rate detection (EAR-based)",
+    "Head-pose and gaze direction classification",
+    "Real-time visual overlay and landmarks (optional)",
+    "Session recording and per-frame metrics export (CSV/JSON)",
+    "Video upload pipeline with frame-by-frame analysis",
+    "Charts: realtime trend, session history, attention distribution",
+    "Configurable thresholds and processing FPS in settings"
+  ],
+  "requirements_summary": {
+    "hardware_minimum": [
+      "Webcam (720p)",
+      "CPU: quad-core equivalent",
+      "RAM: 8GB"
+    ],
+    "hardware_recommended": [
+      "Webcam 1080p",
+      "CPU: modern 4-8 cores",
+      "RAM: 16GB",
+      "Optional GPU for faster MediaPipe (compatible)"
+    ],
+    "software": [
+      "Modern browser with WebRTC/WebAssembly support",
+      "Node/Python backend optional for storage and analytics",
+      "FFmpeg (server-side video processing optional)"
+    ]
+  },
   "core_components": {
     "computer_vision": {
       "technologies": [

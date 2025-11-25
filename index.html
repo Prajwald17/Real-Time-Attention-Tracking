@@ -141,10 +141,7 @@
                                             <div class="metric-label">Average Score</div>
                                             <div class="metric-value" id="average-score">--%</div>
                                         </div>
-                                        <div class="metric-item">
-                                            <div class="metric-label">Blink Rate</div>
-                                            <div class="metric-value" id="blink-rate">--/min</div>
-                                        </div>
+
                                         <div class="metric-item">
                                             <div class="metric-label">Distraction Events</div>
                                             <div class="metric-value" id="distraction-events">0</div>
@@ -284,6 +281,7 @@
                                     <div class="export-controls">
                                         <button class="btn btn--secondary btn--sm" id="export-csv-btn">Export CSV</button>
                                         <button class="btn btn--outline btn--sm" id="export-json-btn">Export JSON</button>
+                                        <button class="btn btn--primary btn--sm" id="export-pdf-btn">Export PDF</button>
                                     </div>
                                 </div>
                             </div>
@@ -443,6 +441,44 @@
 
                         <div class="card">
                             <div class="card__header">
+                                <h3>Alerts & Notifications</h3>
+                            </div>
+                            <div class="card__body">
+                                <div class="form-group">
+                                    <label class="form-label">Alert Threshold (%)</label>
+                                    <select class="form-control" id="alert-threshold">
+                                        <option value="30">30% (Very Sensitive)</option>
+                                        <option value="40" selected>40% (Recommended)</option>
+                                        <option value="50">50% (Less Sensitive)</option>
+                                    </select>
+                                    <p class="form-help">Trigger alerts when attention falls below this level</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Alert Duration (seconds)</label>
+                                    <select class="form-control" id="alert-duration">
+                                        <option value="3">3 seconds</option>
+                                        <option value="5" selected>5 seconds</option>
+                                        <option value="10">10 seconds</option>
+                                    </select>
+                                    <p class="form-help">How long low attention must persist before alerting</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="enable-audio-alerts" checked> Enable audio alerts
+                                    </label>
+                                    <p class="form-help">Play sound when attention is low</p>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="enable-visual-alerts" checked> Enable visual alerts
+                                    </label>
+                                    <p class="form-help">Show visual warning overlay</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card__header">
                                 <h3>Recording & Export</h3>
                             </div>
                             <div class="card__body">
@@ -501,5 +537,6 @@
     </div>
 
     <script src="app.js"></script>
+    <script src="enhanced-features.js"></script>
 </body>
 </html>
